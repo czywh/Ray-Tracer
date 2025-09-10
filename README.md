@@ -7,10 +7,10 @@ implementation here.
 Please ensure your student details are specified below (*exactly* as on UniMelb
 records):
 
-**Name:** ... \
-**Student Number:** XXXXXXX \
-**Username:** ... \
-**Email:** ...@student.unimelb.edu.au
+**Name:** Jason Wu \
+**Student Number:** 1362025 \
+**Username:** Hawu7 \
+**Email:** jason.wu@student.unimelb.edu.au
 
 ## Completed stages
 
@@ -24,25 +24,25 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
 ##### Stage 1
 
 - [x] Stage 1.1 - Familiarise yourself with the template
-- [ ] Stage 1.2 - Implement vector mathematics
-- [ ] Stage 1.3 - Fire a ray for each pixel
-- [ ] Stage 1.4 - Calculate ray-entity intersections
-- [ ] Stage 1.5 - Output primitives as solid colours
+- [x] Stage 1.2 - Implement vector mathematics
+- [x] Stage 1.3 - Fire a ray for each pixel
+- [x] Stage 1.4 - Calculate ray-entity intersections
+- [x] Stage 1.5 - Output primitives as solid colours
 
 ##### Stage 2
 
-- [ ] Stage 2.1 - Illumination
-- [ ] Stage 2.2 - Shadow rays
-- [ ] Stage 2.3 - Reflection rays
-- [ ] Stage 2.4 - Refraction rays
-- [ ] Stage 2.5 - The Whitted Illumination Model
+- [x] Stage 2.1 - Illumination
+- [x] Stage 2.2 - Shadow rays
+- [x] Stage 2.3 - Reflection rays
+- [x] Stage 2.4 - Refraction rays
+- [x] Stage 2.5 - The Whitted Illumination Model
 
 ##### Stage 3
 
-- [ ] Stage 3.1 - Advanced features
-- [ ] Stage 3.2 - Advanced add-ons
-  - [ ] A.1 - Anti-aliasing
-  - [ ] A.2 - Soft shadows
+- [x] Stage 3.1 - Advanced features
+- [x] Stage 3.2 - Advanced add-ons
+  - [x] A.1 - Anti-aliasing
+  - [x] A.2 - Soft shadows
   - [ ] A.3 - Depth of field blur
   - [ ] A.4 - Motion blur
   - [ ] B.1 - Color texture mapping
@@ -53,6 +53,20 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
   - [ ] C.3 - Camera animation
 
 *Please summarise your approach(es) to stage 3 here.*
+- Using AABB and BVH for more efficient intersect detection 
+- Using SSAA method for Anti-aliasing 
+- To demonstrate soft shadows effect, an "RedCeilingLight" is placed on the top centre of ceiling 
+- Regarding the calculation of soft shadows, in order to achieve higher efficiency, Phong is calculated only once and then multiplied by the "visibility ratio". If for a more realistic effect, Phong (Diffuse + Specular) can be calculated separately for each sampling point.
+- the number of samples for soft shadows is deisgn to be Maximum (9, AAMultiplier * AAMultiplier)
+
+
+### Way to Use 
+
+```bash
+dotnet run -- -f tests/sample_scene_obj.txt -o images/obj_render.png
+
+dotnet run -- -f tests/multi_models.txt -o images/multi_models.png
+```
 
 ## Final scene render
 
@@ -61,12 +75,12 @@ shows up here.
 
 ![My final render](images/final_scene.png)
 
-This render took **x** minutes and **y** seconds on my PC.
+This render took **1** minutes and **03** seconds on my PC.
 
 I used the following command to render the image exactly as shown:
 
 ```
-dotnet run -- (... your command line args)
+dotnet run -- -f tests/final_scene.txt -o images/final_scene.png -x 3
 ```
 
 ## Sample outputs

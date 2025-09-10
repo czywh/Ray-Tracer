@@ -1,5 +1,4 @@
 using System;
-using System.Numerics;
 
 namespace RayTracer
 {
@@ -32,8 +31,27 @@ namespace RayTracer
         /// <returns>Hit data (or null if no intersection)</returns>
         public RayHit Intersect(Ray ray)
         {
-            // Write your code here...
-            return null;
+
+			Vector3 Origin = ray.Origin;
+			Vector3 Direction = ray.Direction;
+
+			// Dot(n, r) close to 0; the ray is (nearly) parallel to the plane 
+			double dot_n_r = Vector3.Dot(this.normal, Direction);
+			if (Math.Abs(dot_n_r) <= Vector3.EPS) return null;
+
+			
+			// t = - dot(n, P_Origion - P_plane) / dot(n, r)
+			double t = -Vector3.Dot(normal, Origin - center) / dot_n_r;
+			// the ray is opposite direction to the plane  
+			if (t <= Vector3.EPS) return null;
+
+			Vector3 hit_postion = Origin + t * Direction;
+			Vector3 hit_normal = this.normal; 
+
+			// the direction of ray and plane's normal are the same, we need to inverse 
+			if (dot_n_r > 0) { hit_normal = -hit_normal; }
+
+			return new(hit_postion, hit_normal, ray.Direction, material, t);
         }
 
         /// <summary>

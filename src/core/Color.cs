@@ -101,5 +101,10 @@ namespace RayTracer
         {
             return new Color(a.r + b.r, a.g + b.g, a.b + b.b);
         }
-    }
+
+		public static implicit operator double(Color v)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

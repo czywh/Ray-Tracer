@@ -260,6 +260,7 @@ namespace RayTracer
                 scene.AddPointLight(light.Value);
             }
 
+
             foreach (var animation in this.animations)
             {
                 scene.AddAnimation(animation.Value);
@@ -292,6 +293,10 @@ namespace RayTracer
                     ParseProceduralMaterial(line);
                     break;
 
+                case "EmissiveMaterial":
+                    ParseEmissiveMaterial(line);
+                    break;
+
                 case "PointLight":
                     ParsePointLight(line);
                     break;
@@ -310,6 +315,10 @@ namespace RayTracer
 
                 case "ObjModel":
                     ParseObjModel(line);
+                    break;
+
+                case "EmissiveDisk":
+                    ParseEmissiveDisk(line);
                     break;
 
                 case "SimpleAnimation":
@@ -417,6 +426,26 @@ namespace RayTracer
         }
 
         /// <summary>
+        /// Parse remaining line tokens as an emissive material and store by key.
+        /// </summary>
+        /// <param name="line">Line to parse</param>
+        private void ParseEmissiveMaterial(Line line)
+        {
+            string identifier = line.ReadString();
+            if (this.materials.ContainsKey(identifier))
+            {
+                throw new ParseException($"Material identifier '{identifier}' already in use.", line.LineNumber);
+            }
+            Color emissiveColor = line.ReadColor();
+            double intensity = line.ReadDouble();
+
+            this.materials.Add(
+                identifier,
+                new EmissiveMaterial(emissiveColor, intensity)
+            );
+        }
+
+        /// <summary>
         /// Parse remaining line tokens as a point light and store by key.
         /// </summary>
         /// <param name="line">Line to parse</param>
@@ -430,6 +459,35 @@ namespace RayTracer
             this.lights.Add(
                 identifier,
                 new PointLight(line.ReadVector3(), line.ReadColor())
+            );
+        }
+
+
+        /// <summary>
+        /// Parse remaining line tokens as an emissive disk and store as entity.
+        /// </summary>
+        /// <param name="line">Line to parse</param>
+        private void ParseEmissiveDisk(Line line)
+        {
+            string identifier = line.ReadString();
+            if (this.entities.ContainsKey(identifier))
+            {
+                throw new ParseException($"Entity identifier '{identifier}' already in use.", line.LineNumber);
+            }
+            Vector3 center = line.ReadVector3();
+            Vector3 normal = line.ReadVector3();
+            float radius = (float)line.ReadDouble();
+            string materialName = line.ReadString();
+
+            if (!this.materials.ContainsKey(materialName))
+            {
+                throw new ParseException($"Material '{materialName}' not found.", line.LineNumber);
+            }
+
+            Material material = this.materials[materialName];
+            this.entities.Add(
+                identifier,
+                new EmissiveDisk(center, normal, radius, material)
             );
         }
 

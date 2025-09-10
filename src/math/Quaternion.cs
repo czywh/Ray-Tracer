@@ -33,9 +33,12 @@ namespace RayTracer
         /// <param name="angle">The angle of rotation in degrees</param>
         public Quaternion(Vector3 axis, double angle)
         {
-            double halfAngle = angle * 0.5 * Math.PI / 180;
+			axis = axis.Normalized();
+			
+			double halfAngle = angle * 0.5 * Math.PI / 180;
             double sinHalfAngle = Math.Sin(halfAngle);
-            this.W = Math.Cos(halfAngle);
+
+			this.W = Math.Cos(halfAngle);
             this.X = axis.X * sinHalfAngle;
             this.Y = axis.Y * sinHalfAngle;
             this.Z = axis.Z * sinHalfAngle;
@@ -63,10 +66,12 @@ namespace RayTracer
         /// <returns>Rotated vector</returns>
         public Vector3 Rotate(Vector3 v)
         {
-            Vector3 u = new Vector3(X, Y, Z);
-            double s = W;
-            return u * (2.0 * u.Dot(v)) + v * (s * s - u.Dot(u)) +
-                   u.Cross(v) * (2.0 * s);
+			Quaternion q = this.Normalized();
+
+			Vector3 u = new(q.X, q.Y, q.Z);
+            double s = q.W;
+            return u * (2.0 * Vector3.Dot(v, u)) + v * (s * s - Vector3.Dot(u, u)) +
+                   Vector3.Cross(u, v) * (2.0 * s);
         }
 
         /// <summary>
