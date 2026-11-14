@@ -39,14 +39,14 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
 - [x] Stage 2.4 - Refraction rays
 - [x] Stage 2.5 - The Whitted Illumination Model
 
-Whitted 模型是一种经典的递归光线追踪方法。它在局部光照的基础上继续追踪阴影、反射与折射，使不同表面之间能够产生更真实的光学交互。
+The Whitted model is a classic recursive ray tracing method. It extends local illumination by tracing shadow, reflection, and refraction rays, producing more realistic optical interactions between surfaces.
 
 ```text
 Color = Ambient + Σⱼ Shadowⱼ × (Diffuseⱼ + Specularⱼ)
       + Kr × Reflected + Kt × Refracted
 ```
 
-其中，`Shadowⱼ` 表示第 j 个光源的可见性，`Kr` 和 `Kt` 分别控制反射与折射贡献。
+`Shadowⱼ` represents the visibility of light j, while `Kr` and `Kt` control the reflection and refraction contributions, respectively.
 
 | Reflection | Refraction | Sample Outcome |
 | --- | --- | --- |
@@ -83,10 +83,13 @@ dotnet run -- -f tests/sample_scene_obj.txt -o images/obj_render.png
 dotnet run -- -f tests/multi_models.txt -o images/multi_models.png
 ```
 
-## Final scene render
+## Final Outcome
 
-Be sure to replace ```/images/final_scene.png``` with your final render so it
-shows up here.
+The final outcome features a bunny on a pedestal inside a brightly lit, colored room.
+
+![Final outcome — bunny scene](images/final-outcome.png)
+
+### Additional Scene Render
 
 ![My final render](images/final_scene.png)
 
