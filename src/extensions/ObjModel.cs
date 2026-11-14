@@ -54,6 +54,11 @@ namespace RayTracer
 			return bvh.Intersect(ray);
 		}
 
+		public bool AnyHit(Ray ray, double tMax)
+		{
+			return bvh != null && bvh.AnyHit(ray, tMax);
+		}
+
 		/// <summary>
 		/// The material attached to this object.
 		/// </summary>

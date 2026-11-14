@@ -67,7 +67,7 @@ namespace RayTracer
 		///  Randomly pick an sample on the disk 
 		/// </summary>
 		/// <param name="rng"> random seed</param>
-		/// <returns></returns>
+		/// <returns>a random postion on the emissive disk</returns>
 		public Vector3 RandomSamplePostion(Random rng)
 		{
 			double Sample_degree = 2.0 * Math.PI * rng.NextDouble();

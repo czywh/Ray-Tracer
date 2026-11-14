@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using Vec2 = System.Numerics.Vector2;
 
 namespace RayTracer
 {
@@ -9,7 +10,7 @@ namespace RayTracer
 	public class Triangle : SceneEntity
 	{
 		private Vector3 v0, v1, v2;
-		private Vector2 uv0, uv1, uv2;
+		private Vec2 uv0, uv1, uv2;
 		private Material material;
 
 		private bool hasUV;
@@ -32,7 +33,7 @@ namespace RayTracer
 
 
 		public Triangle(Vector3 v0, Vector3 v1, Vector3 v2, Material material,
-					Vector2 uv0, Vector2 uv1, Vector2 uv2)
+					Vec2 uv0, Vec2 uv1, Vec2 uv2)
 		{
 			this.v0 = v0;
 			this.v1 = v1;
@@ -106,7 +107,7 @@ namespace RayTracer
 				double b1 = v;
 				double b2 = 1 - b0 - b1;
 
-				Vector2 uv = uv0 * (float)b0 + uv1 * (float)b1 + uv2 * (float)b2;
+				Vec2 uv = uv0 * (float)b0 + uv1 * (float)b1 + uv2 * (float)b2;
 				hit.U = uv.X;
 				hit.V = uv.Y;
 			}

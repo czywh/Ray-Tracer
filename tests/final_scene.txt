@@ -5,16 +5,15 @@ Material "RedMat" (0, 0, 0) (1, .5, .5) (0, 0, 0) 0 0 0 1
 Material "GreenMat" (0, 0, 0) (.5, 1, .5) (0, 0, 0) 0 0 0 1
 Material "BlueMat" (0, 0, 0) (.5, .5, 1) (0, 0, 0) 0 0 0 1
 Material "BunnyMat" (0, 0, 0) (1, .5, 1) (0, 0, 0) 0 0 0 1
-EmissiveMaterial "RedCeilingLight" (1.0, 0.4, 0.4) 2.0
+
+EmissiveMaterial "AreaLight" (0.2, 0.85, 0.6) 3.0
 
 PointLight "Light1" (0, 0.8, 1.5) (.5, .5, .5)
 PointLight "Light2" (-0.5, 0.2, 0.5) (.5, .5, .5)
 
-EmissiveDisk "LightDisk" (0, 0.95, 2.0) (0, -1, 0) 0.35 "RedCeilingLight"
 
-
-ObjModel "Bunny" "tests/models/bunny.obj" (0, -0.5, 2) (0, 0, 1) 0 .35 "BunnyMat"
-ObjModel "Box" "tests/models/box.obj" (0, -0.9, 2.3) (0, 0, 1) 0 .35 "BunnyMat"
+ObjModel "Bunny" "tests/models/bunny.obj" (-0.1, -0.5, 1.5) (0, 0, 1) 0 .35 "BunnyMat"
+ObjModel "Box" "tests/models/box.obj" (0, -0.9, 1.7) (0, 0, 1) 0 .35 "BunnyMat"
 
 Plane "Floor" (0, -1, 0) (0, 1, 0) "GreyMat"
 Plane "Roof" (0, 1, 0) (0, -1, 0) "GreyMat"

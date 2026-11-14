@@ -9,7 +9,7 @@ Material "BunnyMat" (0, 0, 0) (1, .5, 1) (0, 0, 0) 0 0 0 1
 PointLight "Light1" (0, 0.8, 1.5) (.5, .5, .5)
 PointLight "Light2" (-0.5, 0.2, 0.5) (.5, .5, .5)
 
-ObjModel "Bunny" "tests/models/bunny.obj" (0, -0.9, 2) (0, 0, 1) 0 .35 "BunnyMat"
+ObjModel "Bunny" "tests/models/bunny.obj" (-0.5, -0.9, 2.5) (0, 0, 1) 0 .35 "BunnyMat"
 
 Plane "Floor" (0, -1, 0) (0, 1, 0) "GreyMat"
 Plane "Roof" (0, 1, 0) (0, -1, 0) "GreyMat"

@@ -70,10 +70,9 @@ namespace RayTracer
 		/// <param name="u">The u coordinate in the texture map</param>
 		/// <param name="v">The v coordinate in the texture map</param>
 		/// <returns>The normal vector at the specified texture coordinate</returns>
-		public virtual Vector3 GetNormal(TextureCoord coord)
+		public virtual Vector3 GetNormal(TextureCoord coord, Vector3 geometricNormal)
 		{
-			// No normal map, return default normal
-			return new Vector3(0, 0, 1);
+			return geometricNormal.Normalized();
 		}
 
 

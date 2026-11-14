@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
-using ImageMagick;
+
 
 
 namespace RayTracer
@@ -16,7 +15,6 @@ namespace RayTracer
 		private Camera camera;
 		private Color ambientLightColor;
 		private ISet<SceneEntity> entities;
-
 		private ISet<SceneEntity> emissiveEntities;
 		private ISet<PointLight> lights;
 
@@ -52,6 +50,21 @@ namespace RayTracer
 		public void SetCamera(Camera camera)
 		{
 			this.camera = camera;
+		}
+
+		/// <summary>
+		/// Rotate the local coordinate basis vectors of the camera to the world space
+		/// </summary>
+		/// <param name="cameraPosition">the local position of camera</param>
+		/// <param name="right">horizaontal basis</param>
+		/// <param name="up">vertical basis</param>
+		public void GetCameraBasis(out Vector3 cameraPosition, out Vector3 right, out Vector3 up)
+		{
+			cameraPosition = this.camera.Transform.Position;
+			Quaternion q = this.camera.Transform.Rotation;
+
+			right = q.Rotate(new Vector3(1, 0, 0)).Normalized();
+			up = q.Rotate(new Vector3(0, 1, 0)).Normalized();
 		}
 
 		/// <summary>
@@ -92,6 +105,41 @@ namespace RayTracer
 		}
 
 		/// <summary>
+		///  Randomly pick an sample on the disk
+		/// <param name="rng"> random seed</param>
+		/// <returns>a random postion on the disk</returns>
+		private static (double x, double y) RandomDiskSampling(Random rng)
+		{
+
+			double Sample_degree = 2.0 * Math.PI * rng.NextDouble();
+			double Sample_radius = Math.Sqrt(rng.NextDouble()) ;
+			double Sample_X = Sample_radius * Math.Cos(Sample_degree);
+			double Sample_Y = Sample_radius * Math.Sin(Sample_degree);
+
+			return (Sample_X, Sample_Y);
+		}
+
+		/// <summary>
+		/// Apply tone mapping to prevent overexposure and improve visual quality.
+		/// </summary>
+		/// <param name="color">Input color in linear space</param>
+		/// <returns>Tone mapped color</returns>
+		private Color ToneMap(Color color)
+		{
+			// Simple Reinhard tone mapping
+			double r = color.R / (1.0 + color.R);
+			double g = color.G / (1.0 + color.G);
+			double b = color.B / (1.0 + color.B);
+			
+			// Clamp to [0,1] range
+			r = Math.Max(0.0, Math.Min(1.0, r));
+			g = Math.Max(0.0, Math.Min(1.0, g));
+			b = Math.Max(0.0, Math.Min(1.0, b));
+			
+			return new Color(r, g, b);
+		}
+
+		/// <summary>
 		/// Render the scene to an output image. This is where the bulk
 		/// of your ray tracing logic should go... though you may wish to
 		/// break it down into multiple functions as it gets more complex!
@@ -104,7 +152,7 @@ namespace RayTracer
 			ComputeWorldImageBounds(outputImage);
 
 			Color background = new(0f, 0f, 0f);
-			int N = Math.Max(1, this.options.AAMultiplier); // samples per axis
+			int N = Math.Max(1, this.options.AAMultiplier); // SSAA - samples per axis
 
 			RenderAllPixles(outputImage, N, background);
 		}
@@ -135,8 +183,9 @@ namespace RayTracer
 
 
 		/// <summary>
-		/// Using Super-sampling anti-aliasing (SSAA), Samples per pxiels = N * N 
+		/// Using Super-sampling anti-aliasing (SSAA) for each pixels, Samples per pxiels = N * N 
 		/// when N = 1, using central sampling 
+		/// for each pxiles, using DOF to calculate color 
 		/// <param name="x">iteration index in width</param>
 		/// <param name="y">siteration index in height</param>
 		/// <param name="N">samples per axis</param>
@@ -149,6 +198,7 @@ namespace RayTracer
 				float u = (x + 0.5f) / width;
 				float v = (y + 0.5f) / height;
 
+				// return SampleWithDOF(u, v, background, rng); // this is for DOF
 				Ray ray = BuildPrimaryRay(u, v);
 				return RayTrace(ray, background);
 			}
@@ -156,6 +206,7 @@ namespace RayTracer
 			Color AA_result = new(0f, 0f, 0f);
 			int smaples_per_pxiels = N * N;
 			
+			// Super sampling anti alisaing, with N * N samples
 			for (int i = 0; i < N; i++)
 			{
 				for (int j = 0; j < N; j++)
@@ -167,15 +218,50 @@ namespace RayTracer
 					// randomly pick a sample located within the horizontal and vertical range of N*N grid;
 					float u = (x + (i + random_pick_x) / N) / width;
 					float v = (y + (j + random_pick_y) / N) / height;
+
 					Ray ray = BuildPrimaryRay(u, v);
 					AA_result += RayTrace(ray, background);
 
+					// Color DOF_Sampling_Color = SampleWithDOF(u, v, background, rng);  // this is for DOF
+					// AA_result += DOF_Sampling_Color;  // this is for DOF
 				}
 			}
 
 			// calculate average color for 
 			AA_result /= smaples_per_pxiels;
 			return AA_result; 
+		}
+
+		/// <summary>
+		///  Calculate Color based on depth of field 
+		/// </summary>
+		/// <param name="u"></param>
+		/// <param name="v"></param>
+		/// <param name="background"></param>
+		/// <param name="rng"></param>
+		/// <returns></returns>
+		private Color SampleWithDOF(float u, float v, Color background, Random rng)
+		{
+			Ray primary = BuildPrimaryRay(u, v);
+			double aperture = this.options.ApertureRadius;
+			double focalLen = this.options.FocalLength;
+
+			Vector3 focalPoint = primary.Origin + (float)focalLen * primary.Direction;
+
+			// pinhole projection if aperature <= 0; 
+			if (aperture <= 0.0)
+				return RayTrace(primary, background);
+
+			GetCameraBasis(out Vector3 cameraPosition, out Vector3 camRight, out Vector3 camUp);
+
+			var (x, y) = RandomDiskSampling(rng);
+
+			Vector3 apertureOffset = x * aperture * camRight + y * aperture * camUp;
+
+			Vector3 Origin = cameraPosition + apertureOffset;
+			Vector3 Direction = (focalPoint - Origin).Normalized();
+			
+			return RayTrace(new Ray(Origin, Direction), background);
 		}
 
 		/// <summary>
@@ -282,20 +368,28 @@ namespace RayTracer
 			if (material.IsEmissive)
 				return material.EmissionColor;
 
-			// Ambient reflection: C_a = C_ma *C_la
-			Color C_a = material.AmbientColor * ambientLightColor;
+			// Get texture coordinates if available
+			TextureCoord texCoord = new TextureCoord(0, 0);
+			if (hitRay.HasUV)
+			{
+				texCoord = new TextureCoord(hitRay.U.Value, hitRay.V.Value);
+			}
+
+			// Get diffuse color from texture if available
+			Color diffuseColor = material.GetDiffuseColor(texCoord);
+			Color C_a = diffuseColor * ambientLightColor;
 			Color C_local = C_a;
 
-			// direction towards the camera
-			Vector3 V = (-hitRay.Incident).Normalized();
+			// Get normal from normal map if available
+			Vector3 N = material.GetNormal(texCoord, hitRay.Normal);
 
 			foreach (var light in this.lights)
 			{
-				C_local += HardShadowsWithPointLight(hitRay, material, light);
+				C_local += HardShadowsWithPointLight(hitRay, material, light, diffuseColor, N);
 			}
 
-			int shadowSamples = Math.Max(9, this.options.AAMultiplier * this.options.AAMultiplier);
-			C_local += SoftShadowWithEmissiveEntities(hitRay, material, shadowSamples, _rng);
+			int shadowSamples = Math.Max(25, this.options.AAMultiplier * this.options.AAMultiplier);
+			C_local += SoftShadowWithEmissiveEntities(hitRay, material, shadowSamples, _rng, diffuseColor, N);
 
 			return C_local;
 		}
@@ -309,7 +403,7 @@ namespace RayTracer
 		/// <param name="material"> the material of hitted object </param>
 		/// <param name="light">the point light we want to calculate</param>
 		/// <returns>Color of Hard Shadows</returns>
-		private Color HardShadowsWithPointLight(RayHit hitRay, Material material, PointLight light)
+		private Color HardShadowsWithPointLight(RayHit hitRay, Material material, PointLight light, Color diffuseColor, Vector3 N)
 		{
 			// if this light is blacked by other entity, there is no specular or diffuse reflection from this light
 			if (!IsRayVisible(hitRay, light.Position)) return new Color(0, 0, 0);
@@ -318,15 +412,18 @@ namespace RayTracer
 			Vector3 L = (light.Position - hitRay.Position).Normalized();
 			// direction towards the camera
 			Vector3 V = (-hitRay.Incident).Normalized();
-			Vector3 N = hitRay.Normal;
 
-			// Diffuse reflection: C_d = C_md * C_l * max(0, N · L)
-			Color C_d = material.DiffuseColor * light.Color * MathF.Max(0, (float)Vector3.Dot(N, L));
+			// Calculate distance attenuation
+			double distance = (light.Position - hitRay.Position).Length();
+			double attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+
+			// Diffuse reflection: C_d = C_md * C_l * max(0, N · L) * attenuation
+			Color C_d = diffuseColor * light.Color * MathF.Max(0, (float)Vector3.Dot(N, L)) * attenuation;
 
 			// R (mirror reflection direction of the light) = (- L) - 2.0f * Dot(-L, N) * N
-			Vector3 R = (-L) - 2f * Vector3.Dot(-L, N) * N;
+			Vector3 R = ((-L) - 2f * Vector3.Dot(-L, N) * N).Normalized();
 
-			// Specular reflection: C_s = C_ms * C_l * [max(0, R · V)]^(n_s)
+			// Specular reflection: C_s = C_ms * C_l * [max(0, R · V)]^(n_s) * attenuation
 			double n_s = (material.Shininess > 0f) ? material.Shininess : 0f;
 			double dot_RV = MathF.Max(0, (float)Vector3.Dot(R, V));
 			Color C_s = material.SpecularColor * light.Color * MathF.Pow((float)dot_RV, (float)n_s);
@@ -344,7 +441,7 @@ namespace RayTracer
 		/// <param name="samples_N">Numbeer of samples want to pick</param>
 		/// <param name="rng">random seed </param>
 		/// <returns>Color of Soft Shadows</returns>
-		private Color SoftShadowWithEmissiveEntities(RayHit hitRay, Material material, int samples_N, Random rng)
+		private Color SoftShadowWithEmissiveEntities(RayHit hitRay, Material material, int samples_N, Random rng, Color diffuseColor, Vector3 N)
 		{
 			if (samples_N <= 0 || emissiveEntities.Count == 0) return new Color(0,0,0);
 
@@ -352,8 +449,6 @@ namespace RayTracer
 
 			// direction towards the camera
    			Vector3 V = (-hitRay.Incident).Normalized();
-			Vector3 N = hitRay.Normal;
-
 
 			foreach (var emitter in emissiveEntities)
 			{
@@ -366,10 +461,10 @@ namespace RayTracer
 				Color C_l = emitter.EmissionColor();
 
 				// Diffuse reflection: C_d = C_md * C_l * max(0, N · L)
-				Color C_d = material.DiffuseColor * C_l * MathF.Max(0, (float)Vector3.Dot(N, L));
+				Color C_d = diffuseColor * C_l * MathF.Max(0, (float)Vector3.Dot(N, L));
 
 				// R (mirror reflection direction of the light) = (- L) - 2.0f * Dot(-L, N) * N
-				Vector3 R = (-L) - 2f * Vector3.Dot(-L, N) * N;
+				Vector3 R = ((-L) - 2f * Vector3.Dot(-L, N) * N).Normalized();
 
 				// Specular reflection: C_s = C_ms * C_l * [max(0, R · V)]^(n_s)
 				double n_s = (material.Shininess > 0f) ? material.Shininess : 0f;
@@ -428,20 +523,21 @@ namespace RayTracer
 
 			double lightDistance = (light_Position - hitRay.Position).Length();
 
-			// Find if there is any entity block the light 
+			// find if there is any entity block the light 
 			foreach (SceneEntity entity in this.entities)
 			{
+				// skip the emitter itself
+				if (entity == emitter) continue;
+				
 				RayHit hit = entity.Intersect(shadowRay);
 				if (hit != null)
-				{
-					double hitDistance = (hit.Position - hitRay.Position).Length();
+					{
+						double hitDistance = (hit.Position - hitRay.Position).Length();
 
-					// ignore emissive entity
-					if (entity == emitter && Math.Abs(hitDistance - lightDistance) < Vector3.EPS) continue;
-
-					// This entity is an obstruction located between the origin and the light
-					if (hitDistance > Vector3.EPS && hitDistance < (lightDistance - Vector3.EPS)) { return false; }
-				}
+						// This entity is an obstruction located between the origin and the light
+						if (hitDistance > Vector3.EPS && hitDistance < (lightDistance - Vector3.EPS)) { return false; }
+					}
+				
 			}
 
 			// no entity is block between the origin of shadow ray and the light. This pixel is visible 
@@ -483,7 +579,6 @@ namespace RayTracer
 			}
 			
 		}
-		
 
     }
 }

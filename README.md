@@ -43,7 +43,7 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
 - [x] Stage 3.2 - Advanced add-ons
   - [x] A.1 - Anti-aliasing
   - [x] A.2 - Soft shadows
-  - [ ] A.3 - Depth of field blur
+  - [x] A.3 - Depth of field blur
   - [ ] A.4 - Motion blur
   - [ ] B.1 - Color texture mapping
   - [ ] B.2 - Bump or normal mapping
@@ -57,7 +57,7 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
 - Using SSAA method for Anti-aliasing 
 - To demonstrate soft shadows effect, an "RedCeilingLight" is placed on the top centre of ceiling 
 - Regarding the calculation of soft shadows, in order to achieve higher efficiency, Phong is calculated only once and then multiplied by the "visibility ratio". If for a more realistic effect, Phong (Diffuse + Specular) can be calculated separately for each sampling point.
-- the number of samples for soft shadows is deisgn to be Maximum (9, AAMultiplier * AAMultiplier)
+- the number of samples for soft shadows is deisgn to be Maximum (25, AAMultiplier * AAMultiplier)
 
 
 ### Way to Use 
@@ -75,12 +75,12 @@ shows up here.
 
 ![My final render](images/final_scene.png)
 
-This render took **1** minutes and **03** seconds on my PC.
+This render took **3** minutes and **10** seconds on my PC.
 
 I used the following command to render the image exactly as shown:
 
 ```
-dotnet run -- -f tests/final_scene.txt -o images/final_scene.png -x 3
+dotnet run -- -f tests/final_scene.txt -o images/final_scene.png --aperture-radius 0.06 --focal-length 1.7 -x 4 
 ```
 
 ## Sample outputs

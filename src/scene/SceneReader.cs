@@ -260,7 +260,6 @@ namespace RayTracer
                 scene.AddPointLight(light.Value);
             }
 
-
             foreach (var animation in this.animations)
             {
                 scene.AddAnimation(animation.Value);
