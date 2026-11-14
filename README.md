@@ -1,32 +1,5 @@
 ![Ray Tracer — Whitted-style ray tracer in C#](images/ray-tracer-cover.png)
 
-## Stage 02 — Whitted-Style Shading
-
-Whitted 模型是一种经典的递归光线追踪方法。它在局部光照的基础上继续追踪阴影、反射与折射，使不同表面之间能够产生更真实的光学交互。
-
-```text
-Color = Ambient + Σⱼ Shadowⱼ × (Diffuseⱼ + Specularⱼ)
-      + Kr × Reflected + Kt × Refracted
-```
-
-其中，`Shadowⱼ` 表示第 j 个光源的可见性，`Kr` 和 `Kt` 分别控制反射与折射贡献。
-
-![Whitted-style shading overview](images/whitted-shading-overview.png)
-
-### Sample Outcome
-
-反射、折射与阴影共同呈现球体和周围彩色墙面的光学交互。
-
-![Whitted shading sample outcome](images/whitted-sample-outcome.png)
-
-### Refraction
-
-透明球体展示递归折射产生的背景与物体变形效果。
-
-![Refraction through transparent spheres](images/whitted-refraction.png)
-
----
-
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/oMRiv2DB)
 # COMP30019 - Project 1 - Ray Tracer
 
@@ -58,13 +31,26 @@ Tip: To tick, place an x between the square brackes [ ], like so: [x]
 - [x] Stage 1.4 - Calculate ray-entity intersections
 - [x] Stage 1.5 - Output primitives as solid colours
 
-##### Stage 2
+##### Stage 2 — Whitted-Style Shading
 
 - [x] Stage 2.1 - Illumination
 - [x] Stage 2.2 - Shadow rays
 - [x] Stage 2.3 - Reflection rays
 - [x] Stage 2.4 - Refraction rays
 - [x] Stage 2.5 - The Whitted Illumination Model
+
+Whitted 模型是一种经典的递归光线追踪方法。它在局部光照的基础上继续追踪阴影、反射与折射，使不同表面之间能够产生更真实的光学交互。
+
+```text
+Color = Ambient + Σⱼ Shadowⱼ × (Diffuseⱼ + Specularⱼ)
+      + Kr × Reflected + Kt × Refracted
+```
+
+其中，`Shadowⱼ` 表示第 j 个光源的可见性，`Kr` 和 `Kt` 分别控制反射与折射贡献。
+
+| Reflection | Refraction | Sample Outcome |
+| --- | --- | --- |
+| ![Reflection](images/whitted-reflection.png) | ![Refraction](images/whitted-refraction.png) | ![Sample outcome](images/whitted-sample-outcome.png) |
 
 ##### Stage 3
 
